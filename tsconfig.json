@@ -1,0 +1,12 @@
+{
+    "extends": "@quasar/app-webpack/tsconfig-preset",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "noImplicitAny": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false
+    }
+}
