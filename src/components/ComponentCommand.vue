@@ -18,7 +18,13 @@
                 <q-tab name="query" label="Query" />
             </q-tabs>
 
-            <q-tab-panels v-model="stateTab" animated>
+            <q-tab-panels
+                v-model="stateTab"
+                animated
+                :style="{
+                    height: 'calc(100vh - ' + state.pageIndexSplitterHorizontal1 + 'px - 160px)'
+                }"
+            >
                 <q-tab-panel name="converter">
                     <div v-for="converter in getCommand().converters" :key="converter.columnIdx">
                         <ComponentCommandMapItem :tableIdx="getCommand().tableIdx" :columnIdx="converter.columnIdx" />
@@ -78,6 +84,7 @@ export default {
         }
         return {
             stateTab: ref('converter'),
+            state,
             getTable,
             getCommand,
             doLoadFile,

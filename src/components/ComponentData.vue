@@ -1,5 +1,15 @@
 <template>
-    <q-btn unelevated color="primary" label="Load data file..." @click="doLoadFile()" />
+    <div style="display: flex; justify-content: space-between">
+        <q-btn unelevated color="primary" label="Load data file..." @click="doLoadFile()" style="max-height: 36px; min-width: 150px" />
+        <div style="text-align: end; margin: 0px 10px 0px 0px; min-width: 330px; max-height: 36px">
+            <div class="text-caption" style="text-overflow: ellipsis; overflow: hidden; max-height: 25px">
+                semi-automatic data processing for Microsoft SQL Server
+            </div>
+            <div class="text-caption" style="text-overflow: ellipsis; overflow: hidden; max-height: 25px; margin: -5px 0px 0px 0px">
+                version 0.0.1 <q-btn dense no-caps flat color="primary" size="sm" label="repository in github" @click="doOpenGitHub(event)" />
+            </div>
+        </div>
+    </div>
     <div v-show="getTabs().length > 0">
         <div class="text-caption" style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; margin: 0px 0px 0px 10px">
             loaded file: {{ getLoadedFullFileName() }}
@@ -23,7 +33,7 @@
                     :virtual-scroll-sticky-size-start="48"
                     row-key="name"
                     :style="{
-                        height: 'calc(' + state.pageIndexSplitterHorizontal1 + 'px - 150px)'
+                        height: 'calc(' + state.pageIndexSplitterHorizontal1 + 'px - 140px)'
                     }"
                 />
             </q-tab-panel>
@@ -95,11 +105,16 @@ export default {
             }
         }
 
+        const doOpenGitHub = () => {
+            electronApi.openUrl('https://github.com/VasilevVitalii/sadap')
+        }
+
         return {
             getTabs,
             getColumns,
             getRows,
             doLoadFile,
+            doOpenGitHub,
             getLoadedFullFileName,
             state: state,
             statePagination: ref({

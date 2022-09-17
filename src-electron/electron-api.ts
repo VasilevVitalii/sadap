@@ -22,6 +22,7 @@ export interface ElectronApi {
               )[]
             | undefined
     ) => Promise<string[]>
+    openUrl: (url: string) => undefined
 }
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

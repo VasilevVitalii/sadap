@@ -2,6 +2,7 @@ import { contextBridge } from 'electron'
 import { dialog } from '@electron/remote'
 import fs from 'fs'
 import exceljs from 'exceljs'
+import { shell } from 'electron'
 
 contextBridge.exposeInMainWorld('electronApi', {
     fsParseXlsx: async (fullFileName: string) => {
@@ -37,5 +38,9 @@ contextBridge.exposeInMainWorld('electronApi', {
             defaultPath
         })
         return response.filePaths
+    },
+
+    openUrl(url: string) {
+        shell.openExternal(url)
     }
 })

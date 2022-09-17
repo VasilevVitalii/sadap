@@ -86,22 +86,6 @@ const command = {
 
         return errors
     },
-    getTemplateDeclareTable(tableIdx: number): string[] {
-        const command = stateCommand.data.commands.find((f) => f.tableIdx === tableIdx)
-        if (!command?.sqlTableName || command.sqlTableName.length <= 1) return []
-        if (command.sqlTableName.substring(0, 1) === '#') {
-            return [`DROP TABLE IF EXISTS ${command.sqlTableName}`, `CREATE TABLE ${command.sqlTableName} (`, '    ${DECLARE_FIELD}', ')']
-        } else if (command.sqlTableName.substring(0, 1) === '@') {
-            return [`DECLARE ${command.sqlTableName} TABLE (`, '    ${DECLARE_FIELD}', ')']
-        }
-        return []
-    },
-    getTemplateInsertTable(tableIdx: number): string[] {
-        const command = stateCommand.data.commands.find((f) => f.tableIdx === tableIdx)
-        if (!command?.sqlTableName || command.sqlTableName.length <= 1) return []
-
-        return [`INSER INTO ${command.sqlTableName} (`, '   ${FIELDS}', ')']
-    },
     getScript(tableIdx: number): string {
         const table = stateData.data.tables.find((f) => f.tableIdx === tableIdx)
         if (!table) return '--not find sheet'
@@ -150,7 +134,9 @@ const command = {
             row.cells
                 .filter((f) => converters.some((ff) => ff.columnIdx === f.columnIdx))
                 .forEach((cell) => {
-                    if (cell.value === undefined || cell.value === null || cell.value === '') {
+                    const value = String(cell?.value || '')
+
+                    if (value === undefined || value === null || value === '') {
                         selectCell.push('NULL')
                         return
                     }
@@ -165,19 +151,19 @@ const command = {
                         return
                     }
                     if (type.name === 'bigint' || type.name === 'int' || type.name === 'smallint' || type.name === 'tinyint') {
-                        if (Number.isInteger(cell.value)) {
-                            selectCell.push(cell.value)
+                        if (Number.isInteger(value)) {
+                            selectCell.push(value)
                         } else {
-                            errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${cell.value} is not ${type.name}`)
+                            errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${value} is not ${type.name}`)
                         }
                     } else if (type.name === 'bit') {
-                        const v = (cell.value as string).toLowerCase()
+                        const v = value.toLowerCase()
                         if (v === '0' || v === 'no' || v === 'false') {
                             selectCell.push('0')
                         } else if (v === '1' || v === 'yes' || v === 'true') {
                             selectCell.push('1')
                         } else {
-                            errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${cell.value} is not ${type.name}`)
+                            errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${value} is not ${type.name}`)
                         }
                     } else if (
                         type.name === 'money' ||
@@ -186,23 +172,23 @@ const command = {
                         type.name === 'float' ||
                         type.name === 'real'
                     ) {
-                        const v = (cell.value as string).replace(/,/gi, '.')
+                        const v = value.replace(/,/gi, '.')
                         if (!isNaN(Number(v))) {
                             selectCell.push(v)
                         } else {
-                            errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${cell.value} is not ${type.name}`)
+                            errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${value} is not ${type.name}`)
                         }
                     } else if (type.name === 'varchar' || type.name === 'nvarchar' || type.name === 'sysname') {
-                        selectCell.push(`'${(cell.value as string).replace(/'/gi, "''")}'`)
+                        selectCell.push(`'${value.replace(/'/gi, "''")}'`)
                     } else if (type.name === 'uniqueidentifier') {
                         const v = (cell.value as string).match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/gi)
                         if (v) {
-                            selectCell.push(`'${cell.value as string}'`)
+                            selectCell.push(`'${value}'`)
                         } else {
-                            errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${cell.value} is not ${type.name}`)
+                            errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${value} is not ${type.name}`)
                         }
                     } else {
-                        selectCell.push(`'${cell.value as string}'`)
+                        selectCell.push(`'${value}'`)
                     }
                 })
             if (errorCell.length > 0) {

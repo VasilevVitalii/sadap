@@ -3,12 +3,12 @@
         <q-splitter
             v-model="splitterHorizontal"
             horizontal
-            style="height: calc(100vh - 55px)"
+            style="height: calc(100vh - 10px)"
             @update:model-value="OnResizeHorizontal"
             ref="splitterHorizontalObject"
         >
             <template v-slot:before>
-                <div style="margin: 10px">
+                <div style="margin: 10px 0px 0px 5px">
                     <ComponentData @onChange="OnResizeHorizontal(splitterHorizontal)" />
                 </div>
             </template>
@@ -18,7 +18,7 @@
                     <div style="width: 610px">
                         <ComponentCommand />
                     </div>
-                    <div>
+                    <div style="width: calc(100wh - 610px)">
                         <ComponentScript />
                     </div>
                 </div>
