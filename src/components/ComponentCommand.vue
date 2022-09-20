@@ -3,9 +3,13 @@
         <q-btn-group unelevated color="primary">
             <q-btn color="primary" :label="getBuildButtonName()" @click="doBuild()" />
             <q-separator vertical />
-            <q-btn color="primary" label="Load command..." />
-            <q-btn color="primary" label="Save command..." />
+            <q-btn color="primary" label="Load mappings..." />
+            <q-btn color="primary" label="Save mappings..." @click="doSaveFile()" />
         </q-btn-group>
+        <div class="text-caption" style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; margin: 0px 0px 0px 10px">
+            {{ getProseedFullFileName() }}
+        </div>
+
         <div v-if="getCommand()">
             <div style="display: flex; margin: 0px 0px 0px 10px">
                 <q-input dense stack-label v-model="getCommand().startRowIdx" label="First row" style="width: 70px" />
@@ -56,9 +60,12 @@ import stateCommand, { TCommand } from '../states/stateCommand'
 import { electronApi } from '../../src-electron/electron-api'
 import { ref } from 'vue'
 import ComponentCommandMapItem from './ComponentCommandMapItem.vue'
+import { useQuasar } from 'quasar'
 export default {
     emits: ['onChange'],
     setup(_, { emit }) {
+        const $q = useQuasar()
+
         const getTable = (): TTable | undefined => {
             return stateData.data.tables.find((f) => f.tableIdx === state.componentDataSelectedTable)
         }
@@ -67,20 +74,74 @@ export default {
         }
         const doBuild = () => {
             emit('onChange')
-            if (state.componentDataSelectedTable === undefined) return
-            stateCommand.command.create(state.componentDataSelectedTable)
-            stateCommand.command.createConverters(state.componentDataSelectedTable)
+            $q.loading.show()
+            try {
+                if (state.componentDataSelectedTable === undefined) return
+                stateCommand.command.create(state.componentDataSelectedTable)
+                stateCommand.command.createConverters(state.componentDataSelectedTable)
+                $q.loading.hide()
+            } catch (error) {
+                $q.loading.hide()
+                $q.dialog({
+                    title: 'Error',
+                    message: `ON BUILD MAPPINGS: ${error}`
+                })
+            }
         }
         const getBuildButtonName = (): string => {
             const tableName = getTable()?.title
             return `${getCommand() ? 'Rebuild' : 'Build'} ${tableName ? ' for "' + tableName + '"' : ''}`.trim()
         }
+        const doSaveFile = async () => {
+            emit('onChange')
+            const fullFileName = await electronApi.fsDialogSave('save mappings', undefined, undefined, ['showHiddenFiles', 'createDirectory'])
+            if (!fullFileName) return
+
+            const data = stateCommand.command.getForSave(getTable()?.tableIdx)
+            if (!data) return
+
+            $q.loading.show()
+            try {
+                await electronApi.fsWriteFile(fullFileName, data)
+                const command = getCommand()
+                if (command) {
+                    command.fileState = 'saved'
+                    command.fileFullName = fullFileName
+                }
+                $q.loading.hide()
+            } catch (error) {
+                $q.loading.hide()
+                $q.dialog({
+                    title: 'Error',
+                    message: `ON SAVE MAPPINGS: ${error}`
+                })
+            }
+        }
         const doLoadFile = async () => {
             emit('onChange')
-            const file = await electronApi.fsDialog('Test', undefined, undefined, ['openFile'])
-            const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : (file as unknown as string)
-            if (!file) return
-            await stateData.command.load(fullFileName)
+            $q.loading.show()
+            try {
+                const file = await electronApi.fsDialogOpen('Open mappings file', undefined, undefined, ['openFile'])
+                const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : (file as unknown as string)
+
+                if (!fullFileName) return
+                const rawText = await electronApi.fsLoadFile(fullFileName)
+                const rawJson = JSON.parse(rawText)
+                stateCommand.command.load(getTable()?.tableIdx, rawJson)
+
+                $q.loading.hide()
+            } catch (error) {
+                $q.loading.hide()
+                $q.dialog({
+                    title: 'Error',
+                    message: `ON LOAD MAPPING FILE: ${error}`
+                })
+            }
+        }
+        const getProseedFullFileName = (): string | undefined => {
+            const command = getCommand()
+            if (!command || !command.fileFullName) return undefined
+            return `${command.fileState} file: ${command.fileFullName}`
         }
         return {
             stateTab: ref('converter'),
@@ -88,8 +149,10 @@ export default {
             getTable,
             getCommand,
             doLoadFile,
+            doSaveFile,
             doBuild,
-            getBuildButtonName
+            getBuildButtonName,
+            getProseedFullFileName
         }
     },
     components: { ComponentCommandMapItem }

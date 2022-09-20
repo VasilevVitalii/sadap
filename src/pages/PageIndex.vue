@@ -18,7 +18,7 @@
                     <div style="width: 610px">
                         <ComponentCommand />
                     </div>
-                    <div style="width: calc(100wh - 610px)">
+                    <div style="width: calc(100vw - 610px)">
                         <ComponentScript />
                     </div>
                 </div>

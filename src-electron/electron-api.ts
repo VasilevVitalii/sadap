@@ -4,7 +4,7 @@ import exceljs from 'exceljs'
 export interface ElectronApi {
     fsParseXlsx: (fullFileName: string) => Promise<exceljs.Workbook>
     fsReadStream: (fullFileName: string) => fs.ReadStream
-    fsDialog: (
+    fsDialogOpen: (
         title?: string | undefined,
         defaultPath?: string | undefined,
         filters?: Electron.FileFilter[] | undefined,
@@ -22,7 +22,15 @@ export interface ElectronApi {
               )[]
             | undefined
     ) => Promise<string[]>
+    fsDialogSave: (
+        title?: string | undefined,
+        defaultPath?: string | undefined,
+        filters?: Electron.FileFilter[] | undefined,
+        properties?: ('showHiddenFiles' | 'createDirectory' | 'treatPackageAsDirectory' | 'dontAddToRecent' | 'showOverwriteConfirmation')[] | undefined
+    ) => Promise<string>
     openUrl: (url: string) => undefined
+    fsWriteFile: (fullFileName: string, data: string) => Promise<undefined>
+    fsLoadFile: (fullFileName: string) => Promise<string>
 }
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

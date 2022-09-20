@@ -46,10 +46,13 @@ import stateData, { TColumn, TRow } from '../states/stateData'
 import state from '../states/state'
 import { QTableColumn } from 'quasar'
 import { electronApi } from '../../src-electron/electron-api'
+import { useQuasar } from 'quasar'
 import { ref } from 'vue'
 export default {
     emits: ['onChange'],
     setup(_, { emit }) {
+        const $q = useQuasar()
+
         const getTabs = (): { title: string; tableIdx: number }[] => {
             return stateData.data.tables.map((table) => {
                 return {
@@ -95,13 +98,23 @@ export default {
 
         const doLoadFile = async () => {
             emit('onChange')
-            const file = await electronApi.fsDialog('Test', undefined, undefined, ['openFile'])
-            const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : (file as unknown as string)
+            $q.loading.show()
+            try {
+                const file = await electronApi.fsDialogOpen('Open data file', undefined, undefined, ['openFile'])
+                const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : (file as unknown as string)
 
-            if (!file) return
-            await stateData.command.load(fullFileName)
-            if (getTabs().length > 0) {
-                state.componentDataSelectedTable = getTabs()[0].tableIdx
+                if (!fullFileName) return
+                await stateData.command.load(fullFileName)
+                if (getTabs().length > 0) {
+                    state.componentDataSelectedTable = getTabs()[0].tableIdx
+                }
+                $q.loading.hide()
+            } catch (error) {
+                $q.loading.hide()
+                $q.dialog({
+                    title: 'Error',
+                    message: `ON LOAD DATA FILE: ${error}`
+                })
             }
         }
 

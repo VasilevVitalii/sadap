@@ -1,7 +1,7 @@
 <template>
     <div v-if="getCommand() && getTable()">
         <q-btn-group unelevated color="primary">
-            <q-btn-dropdown color="primary" :label="getBuildButtonName()">
+            <q-btn-dropdown color="primary" :label="getBuildButtonName()" style="max-height: 36px; min-width: 200px">
                 <q-list dense class="bg-primary text-white">
                     <q-item clickable v-close-popup @click="doBuild('app')">
                         <q-item-section>
@@ -16,7 +16,7 @@
                     </q-item>
                 </q-list>
             </q-btn-dropdown>
-            <q-btn color="primary" label="Copy to clipboard" />
+            <q-btn color="primary" label="Copy to clipboard" style="max-height: 36px; min-width: 170px" />
         </q-btn-group>
         <div style="display: flex">
             <q-tabs v-model="stateTab" dense align="left" active-color="primary" indicator-color="primary" narrow-indicator>
@@ -24,33 +24,24 @@
                 <q-tab name="error" label="Errors" />
             </q-tabs>
         </div>
-        <q-tab-panels v-model="stateTab" animated>
-            <q-tab-panel name="script">
-                <q-input
+        <q-tab-panels
+            v-model="stateTab"
+            animated
+            :style="{
+                height: 'calc(100vh - ' + state.pageIndexSplitterHorizontal1 + 'px - 110px)'
+            }"
+        >
+            <q-tab-panel name="script" style="padding: 16px 10px 0px 10px; overflow: hidden">
+                <textarea
                     v-if="getScript()"
-                    dense
-                    style="min-height: 70px"
-                    type="textarea"
-                    spellcheck="false"
-                    autogrow
-                    stack-label
-                    borderless
-                    readonly
                     v-model="getScript().script"
+                    spellcheck="false"
+                    readonly
+                    style="width: 100%; height: 100%; resize: none; border: none; outline: none; white-space: pre"
                 />
             </q-tab-panel>
-            <q-tab-panel name="error">
-                <q-input
-                    dense
-                    style="min-height: 70px"
-                    type="textarea"
-                    spellcheck="false"
-                    autogrow
-                    stack-label
-                    borderless
-                    readonly
-                    :model-value="getErrors()"
-                />
+            <q-tab-panel name="error" style="padding: 16px 10px 0px 10px; overflow: hidden">
+                <textarea :value="getErrors()" spellcheck="false" readonly style="width: 100%; resize: none; border: none; outline: none; white-space: pre" />
             </q-tab-panel>
         </q-tab-panels>
     </div>
@@ -60,12 +51,14 @@
 import stateData, { TTable } from '../states/stateData'
 import state from '../states/state'
 import stateScript, { TScript } from '../states/stateScript'
-import stateCommand, { TCommand, TConverter } from '../states/stateCommand'
+import stateCommand, { TCommand } from '../states/stateCommand'
+import { useQuasar } from 'quasar'
 import { electronApi } from '../../src-electron/electron-api'
-import { Types } from 'mssqlcoop'
 import { ref } from 'vue'
 export default {
     setup() {
+        const $q = useQuasar()
+
         const stateTab = ref('error')
 
         const getTable = (): TTable | undefined => {
@@ -89,7 +82,7 @@ export default {
             return stateScript.command.getErrors(tableIdx).join('\n').trim()
         }
 
-        const doBuild = (target: 'app' | 'file') => {
+        const doBuild = async (target: 'app' | 'file') => {
             if (getErrors()) {
                 stateTab.value = 'error'
                 return
@@ -97,16 +90,36 @@ export default {
             const tableIdx = getTable()?.tableIdx
             if (!tableIdx) return
 
-            stateScript.data.scripts = stateScript.data.scripts.filter((f) => f.tableIdx !== tableIdx)
-            const script = stateScript.command.getScript(tableIdx)
+            $q.loading.show()
+            try {
+                let fullFileName = undefined as string | undefined
+                if (target === 'file') {
+                    fullFileName = await electronApi.fsDialogSave('Save script', undefined, undefined, ['showHiddenFiles', 'createDirectory'])
+                    if (!fullFileName) return
+                }
 
-            if (target === 'app') {
-                stateScript.data.scripts.push({ tableIdx, script })
+                stateScript.data.scripts = stateScript.data.scripts.filter((f) => f.tableIdx !== tableIdx)
+                const script = stateScript.command.getScript(tableIdx)
+
+                if (target === 'file' && fullFileName) {
+                    await electronApi.fsWriteFile(fullFileName, script)
+                    stateScript.data.scripts.push({ tableIdx, script: `saved to\n${fullFileName}` })
+                } else if (target === 'app') {
+                    stateScript.data.scripts.push({ tableIdx, script })
+                }
                 stateTab.value = 'script'
+                $q.loading.hide()
+            } catch (error) {
+                $q.loading.hide()
+                $q.dialog({
+                    title: 'Error',
+                    message: `ON GENERATE SCRIPT: ${error}`
+                })
             }
         }
 
         return {
+            state,
             stateTab,
             getTable,
             getCommand,

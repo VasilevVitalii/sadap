@@ -13,7 +13,7 @@ contextBridge.exposeInMainWorld('electronApi', {
     fsReadStream: (fullFileName: string) => {
         return fs.createReadStream(fullFileName)
     },
-    fsDialog: async (
+    fsDialogOpen: async (
         title?: string | undefined,
         defaultPath?: string | undefined,
         filters?: Electron.FileFilter[] | undefined,
@@ -39,7 +39,36 @@ contextBridge.exposeInMainWorld('electronApi', {
         })
         return response.filePaths
     },
-
+    fsDialogSave: async (
+        title?: string | undefined,
+        defaultPath?: string | undefined,
+        filters?: Electron.FileFilter[] | undefined,
+        properties?: ('showHiddenFiles' | 'createDirectory' | 'treatPackageAsDirectory' | 'dontAddToRecent' | 'showOverwriteConfirmation')[] | undefined
+    ) => {
+        const response = await dialog.showSaveDialog({
+            title,
+            filters,
+            properties,
+            defaultPath
+        })
+        return response.filePath
+    },
+    fsWriteFile: async (fullFileName: string, data: string) => {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(fullFileName, data, { encoding: 'utf8' }, (error: Error | null) => {
+                if (error) return reject(error)
+                resolve(undefined)
+            })
+        })
+    },
+    fsLoadFile: async (fullFileName: string) => {
+        return new Promise((resolve, reject) => {
+            fs.readFile(fullFileName, 'utf-8', (error, data) => {
+                if (error) return reject(error)
+                resolve(data)
+            })
+        })
+    },
     openUrl(url: string) {
         shell.openExternal(url)
     }

@@ -1,5 +1,4 @@
 import { reactive } from 'vue'
-import { electronApi } from '../../src-electron/electron-api'
 import stateData, { TColumn, TTable } from './stateData'
 
 export type TConverter = {
@@ -19,6 +18,8 @@ export type TCommand = {
     sqlTableName: string | undefined
     sqlSuffix?: string[] | undefined
     converters: TConverter[]
+    fileState?: 'loaded' | 'saved'
+    fileFullName?: string
 }
 
 const data = reactive({
@@ -82,6 +83,55 @@ const command = {
         }
 
         return converter
+    },
+    getForSave(tableIdx: number | undefined): string | undefined {
+        if (tableIdx === undefined) return undefined
+        let command = data.commands.find((f) => f.tableIdx === tableIdx)
+        if (!command) {
+            this.create(tableIdx)
+            this.createConverters(tableIdx)
+        }
+        command = data.commands.find((f) => f.tableIdx === tableIdx)
+        if (!command) return undefined
+
+        return JSON.stringify(
+            {
+                startRowIdx: command.startRowIdx,
+                stopRowIdx: command.stopRowIdx,
+                sqlTableName: command.sqlTableName,
+                sqlSuffix: command.sqlSuffix,
+                converters: command.converters
+            },
+            null,
+            '\t'
+        )
+    },
+    load(tableIdx: number | undefined, raw: object) {
+        const json = raw as any as TCommand
+
+        if (tableIdx === undefined) return
+        let command = data.commands.find((f) => f.tableIdx === tableIdx)
+        if (!command) {
+            this.create(tableIdx)
+            this.createConverters(tableIdx)
+        }
+        command = data.commands.find((f) => f.tableIdx === tableIdx)
+        if (!command) return
+
+        command.startRowIdx = json.startRowIdx
+        command.stopRowIdx = json.stopRowIdx
+        command.sqlTableName = json.sqlTableName
+        command.sqlSuffix = json.sqlSuffix
+        command.converters.forEach((converter) => {
+            const fnd = json.converters.find((f) => f.columnIdx === converter.columnIdx)
+            if (!fnd) return
+            converter.allow = fnd.allow
+            converter.sqlColumnName = fnd.sqlColumnName
+            converter.sqlColumnType = fnd.sqlColumnType
+            converter.sqlColumnLen = fnd.sqlColumnLen
+            converter.sqlColumnScale = fnd.sqlColumnScale
+            converter.sqlColumnPrecision = fnd.sqlColumnPrecision
+        })
     }
 }
 
