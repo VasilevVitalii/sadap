@@ -3,7 +3,7 @@
         <q-btn-group unelevated color="primary">
             <q-btn color="primary" :label="getBuildButtonName()" @click="doBuild()" />
             <q-separator vertical />
-            <q-btn color="primary" label="Load mappings..." />
+            <q-btn color="primary" label="Load mappings..." @click="doLoadFile()" />
             <q-btn color="primary" label="Save mappings..." @click="doSaveFile()" />
         </q-btn-group>
         <div class="text-caption" style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; margin: 0px 0px 0px 10px">
@@ -62,8 +62,7 @@ import { ref } from 'vue'
 import ComponentCommandMapItem from './ComponentCommandMapItem.vue'
 import { useQuasar } from 'quasar'
 export default {
-    emits: ['onChange'],
-    setup(_, { emit }) {
+    setup() {
         const $q = useQuasar()
 
         const getTable = (): TTable | undefined => {
@@ -73,7 +72,6 @@ export default {
             return stateCommand.data.commands.find((f) => f.tableIdx === state.componentDataSelectedTable)
         }
         const doBuild = () => {
-            emit('onChange')
             $q.loading.show()
             try {
                 if (state.componentDataSelectedTable === undefined) return
@@ -93,8 +91,17 @@ export default {
             return `${getCommand() ? 'Rebuild' : 'Build'} ${tableName ? ' for "' + tableName + '"' : ''}`.trim()
         }
         const doSaveFile = async () => {
-            emit('onChange')
-            const fullFileName = await electronApi.fsDialogSave('save mappings', undefined, undefined, ['showHiddenFiles', 'createDirectory'])
+            const defaultPath = stateCommand.data.fullFileName ? electronApi.fsPathParse(stateCommand.data.fullFileName).dir : undefined
+
+            const fullFileName = await electronApi.fsDialogSave(
+                'save mappings',
+                defaultPath,
+                [
+                    { name: 'JSON', extensions: ['json'] },
+                    { name: 'All files', extensions: ['*'] }
+                ],
+                ['showHiddenFiles', 'createDirectory']
+            )
             if (!fullFileName) return
 
             const data = stateCommand.command.getForSave(getTable()?.tableIdx)
@@ -118,13 +125,22 @@ export default {
             }
         }
         const doLoadFile = async () => {
-            emit('onChange')
-            $q.loading.show()
             try {
-                const file = await electronApi.fsDialogOpen('Open mappings file', undefined, undefined, ['openFile'])
-                const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : (file as unknown as string)
+                const defaultPath = stateCommand.data.fullFileName ? electronApi.fsPathParse(stateCommand.data.fullFileName).dir : undefined
 
+                const file = await electronApi.fsDialogOpen(
+                    'Open mappings file',
+                    defaultPath,
+                    [
+                        { name: 'JSON', extensions: ['json'] },
+                        { name: 'All files', extensions: ['*'] }
+                    ],
+                    ['openFile']
+                )
+                const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : undefined
                 if (!fullFileName) return
+
+                $q.loading.show()
                 const rawText = await electronApi.fsLoadFile(fullFileName)
                 const rawJson = JSON.parse(rawText)
                 stateCommand.command.load(getTable()?.tableIdx, rawJson)

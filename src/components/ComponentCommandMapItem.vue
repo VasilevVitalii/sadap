@@ -1,5 +1,5 @@
 <template>
-    <div style="display: flex" v-if="getColumn() && getConverter()">
+    <div style="display: flex" v-if="getColumn() && getConverter()" @mouseenter="mouse('enter')" @mouseleave="mouse('leave')">
         <div
             class="text-caption"
             style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; width: 25px; text-align: right; margin: 16px 0px -0px -10px"
@@ -98,12 +98,17 @@ export default {
             return false
         }
 
+        const mouse = (action: string) => {
+            console.log(action, props.columnIdx)
+        }
+
         return {
             getConverter,
             getColumn,
             getSupportedTypes,
             getAllowShowLen,
-            getAllowShowScalePrecision
+            getAllowShowScalePrecision,
+            mouse
         }
     }
 }

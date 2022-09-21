@@ -124,7 +124,10 @@ const command = {
         command.sqlSuffix = json.sqlSuffix
         command.converters.forEach((converter) => {
             const fnd = json.converters.find((f) => f.columnIdx === converter.columnIdx)
-            if (!fnd) return
+            if (!fnd) {
+                converter.allow = false
+                return
+            }
             converter.allow = fnd.allow
             converter.sqlColumnName = fnd.sqlColumnName
             converter.sqlColumnType = fnd.sqlColumnType

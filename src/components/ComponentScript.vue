@@ -16,7 +16,7 @@
                     </q-item>
                 </q-list>
             </q-btn-dropdown>
-            <q-btn color="primary" label="Copy to clipboard" style="max-height: 36px; min-width: 170px" />
+            <q-btn color="primary" label="Copy to clipboard" style="max-height: 36px; min-width: 170px" @click="doClipboard()" />
         </q-btn-group>
         <div style="display: flex">
             <q-tabs v-model="stateTab" dense align="left" active-color="primary" indicator-color="primary" narrow-indicator>
@@ -52,7 +52,7 @@ import stateData, { TTable } from '../states/stateData'
 import state from '../states/state'
 import stateScript, { TScript } from '../states/stateScript'
 import stateCommand, { TCommand } from '../states/stateCommand'
-import { useQuasar } from 'quasar'
+import { useQuasar, copyToClipboard } from 'quasar'
 import { electronApi } from '../../src-electron/electron-api'
 import { ref } from 'vue'
 export default {
@@ -83,40 +83,67 @@ export default {
         }
 
         const doBuild = async (target: 'app' | 'file') => {
-            if (getErrors()) {
-                stateTab.value = 'error'
-                return
-            }
-            const tableIdx = getTable()?.tableIdx
-            if (!tableIdx) return
-
-            $q.loading.show()
-            try {
-                let fullFileName = undefined as string | undefined
-                if (target === 'file') {
-                    fullFileName = await electronApi.fsDialogSave('Save script', undefined, undefined, ['showHiddenFiles', 'createDirectory'])
-                    if (!fullFileName) return
+                if (getErrors()) {
+                    stateTab.value = 'error'
+                    return
                 }
+                const tableIdx = getTable()?.tableIdx
+                if (!tableIdx) return
 
-                stateScript.data.scripts = stateScript.data.scripts.filter((f) => f.tableIdx !== tableIdx)
-                const script = stateScript.command.getScript(tableIdx)
+                try {
+                    let fullFileName = undefined as string | undefined
+                    if (target === 'file') {
+                        const defaultPath = getScript()?.fullFileName ? electronApi.fsPathParse(getScript()?.fullFileName || '').dir : undefined
 
-                if (target === 'file' && fullFileName) {
-                    await electronApi.fsWriteFile(fullFileName, script)
-                    stateScript.data.scripts.push({ tableIdx, script: `saved to\n${fullFileName}` })
-                } else if (target === 'app') {
-                    stateScript.data.scripts.push({ tableIdx, script })
+                        fullFileName = await electronApi.fsDialogSave(
+                            'Save script',
+                            defaultPath,
+                            [
+                                { name: 'SQL', extensions: ['sql'] },
+                                { name: 'All files', extensions: ['*'] }
+                            ],
+                            ['showHiddenFiles', 'createDirectory']
+                        )
+                        if (!fullFileName) return
+                    }
+
+                    $q.loading.show()
+
+                    stateScript.data.scripts = stateScript.data.scripts.filter((f) => f.tableIdx !== tableIdx)
+                    const script = stateScript.command.getScript(tableIdx)
+
+                    if (target === 'file' && fullFileName) {
+                        await electronApi.fsWriteFile(fullFileName, script)
+                        stateScript.data.scripts.push({ tableIdx, script: `saved to\n${fullFileName}`, fullFileName: fullFileName })
+                    } else if (target === 'app') {
+                        stateScript.data.scripts.push({ tableIdx, script })
+                    }
+                    stateTab.value = 'script'
+                    $q.loading.hide()
+                } catch (error) {
+                    $q.loading.hide()
+                    $q.dialog({
+                        title: 'Error',
+                        message: `ON GENERATE SCRIPT: ${error}`
+                    })
                 }
-                stateTab.value = 'script'
-                $q.loading.hide()
-            } catch (error) {
-                $q.loading.hide()
-                $q.dialog({
-                    title: 'Error',
-                    message: `ON GENERATE SCRIPT: ${error}`
-                })
+            },
+            doClipboard = () => {
+                const s = getScript()
+                if (!s || !s.script) return
+                copyToClipboard(s.script)
+                    .then(() => {
+                        $q.notify({
+                            message: 'copied to clipboard'
+                        })
+                    })
+                    .catch((error) => {
+                        $q.dialog({
+                            title: 'Error',
+                            message: `ON COPY TO CLIPBOARD: ${error}`
+                        })
+                    })
             }
-        }
 
         return {
             state,
@@ -126,7 +153,8 @@ export default {
             getBuildButtonName,
             getErrors,
             getScript,
-            doBuild
+            doBuild,
+            doClipboard
         }
     }
 }

@@ -63,10 +63,7 @@ const command = {
                                 label: name,
                                 align: 'left',
                                 field: `col${columnIdx}`,
-                                format: (val) => `${val}`,
-                                sortable: true,
-                                style: 'max-width: 150px; text-overflow: ellipsis; overflow: hidden',
-                                headerStyle: 'max-width: 150px; text-overflow: ellipsis; overflow: hidden'
+                                format: (val) => `${val}`
                             } as QTableColumn
                         }
                     }),

@@ -49,6 +49,14 @@ function createWindow() {
     mainWindow.on('closed', () => {
         mainWindow = undefined
     })
+    mainWindow.on('resize', function () {
+        const size = mainWindow?.getSize()
+        if (!size) return
+        const width = size[0]
+        const height = size[1]
+        console.log('width: ' + width)
+        console.log('height: ' + height)
+    })
 
     enable(mainWindow.webContents)
 }

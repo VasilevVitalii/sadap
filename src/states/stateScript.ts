@@ -1,11 +1,11 @@
 import { reactive } from 'vue'
-import { electronApi } from '../../src-electron/electron-api'
 import stateData, { TTable } from './stateData'
 import stateCommand from './stateCommand'
 import { Types } from 'mssqlcoop'
 
 export type TScript = {
     tableIdx: number
+    fullFileName?: string
     script: string
 }
 
@@ -151,7 +151,8 @@ const command = {
                         return
                     }
                     if (type.name === 'bigint' || type.name === 'int' || type.name === 'smallint' || type.name === 'tinyint') {
-                        if (Number.isInteger(value)) {
+                        const v = Number(value)
+                        if (Number.isInteger(v) && !isNaN(Number(v))) {
                             selectCell.push(value)
                         } else {
                             errorCell.push(`--in row #${row.rowIdx}, data column ${dc(table, cell.columnIdx)} value ${value} is not ${type.name}`)
@@ -212,7 +213,7 @@ const command = {
             }
         }
 
-        return [...error, ...query].filter((f) => f).join('\n')
+        return [...error, ...query, command.sqlSuffix].filter((f) => f).join('\n')
     }
 }
 

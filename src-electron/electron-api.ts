@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 import exceljs from 'exceljs'
 
 export interface ElectronApi {
@@ -31,6 +32,7 @@ export interface ElectronApi {
     openUrl: (url: string) => undefined
     fsWriteFile: (fullFileName: string, data: string) => Promise<undefined>
     fsLoadFile: (fullFileName: string) => Promise<string>
+    fsPathParse: (fullFileName: string) => path.ParsedPath
 }
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

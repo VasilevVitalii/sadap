@@ -35,7 +35,13 @@
                     :style="{
                         height: 'calc(' + state.pageIndexSplitterHorizontal1 + 'px - 140px)'
                     }"
-                />
+                >
+                    <!-- <template v-slot:body="props">
+                        <q-tr :props="props">
+                            <q-td v-for="column in getColumns(tab.tableIdx)" :key="column.name" :props="props"> {{ props.row[column.field] }} </q-td>
+                        </q-tr>
+                    </template> -->
+                </q-table>
             </q-tab-panel>
         </q-tab-panels>
     </div>
@@ -43,6 +49,9 @@
 
 <script lang="ts">
 import stateData, { TColumn, TRow } from '../states/stateData'
+import stateCommand from '../states/stateCommand'
+import stateScript from '../states/stateScript'
+
 import state from '../states/state'
 import { QTableColumn } from 'quasar'
 import { electronApi } from '../../src-electron/electron-api'
@@ -72,10 +81,18 @@ export default {
                     align: 'left',
                     field: 'rowIdx',
                     format: (val) => `${val}`,
-                    sortable: true
+                    sortable: true,
+                    headerClasses: 'bg-secondary',
+                    classes: 'bg-secondary'
                 },
                 ...columns.map((column) => {
-                    return column.qColumn
+                    return {
+                        ...column.qColumn,
+                        headerClasses: 'bg-secondary',
+                        headerStyle: 'max-width: 150px; text-overflow: ellipsis; overflow: hidden',
+                        style: 'max-width: 150px; text-overflow: ellipsis; overflow: hidden',
+                        sortable: true
+                    }
                 })
             ]
         }
@@ -97,14 +114,30 @@ export default {
         }
 
         const doLoadFile = async () => {
-            emit('onChange')
-            $q.loading.show()
             try {
-                const file = await electronApi.fsDialogOpen('Open data file', undefined, undefined, ['openFile'])
-                const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : (file as unknown as string)
+                const defaultPath = stateData.data.fullFileName ? electronApi.fsPathParse(stateData.data.fullFileName).dir : undefined
 
+                const file = await electronApi.fsDialogOpen(
+                    'Open data file',
+                    defaultPath,
+                    [
+                        { name: 'XLSX', extensions: ['xlsx'] },
+                        { name: 'All files', extensions: ['*'] }
+                    ],
+                    ['openFile']
+                )
+                const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : undefined
                 if (!fullFileName) return
+
+                emit('onChange')
+                $q.loading.show()
+
                 await stateData.command.load(fullFileName)
+
+                stateCommand.data.commands = []
+                stateCommand.data.fullFileName = ''
+                stateScript.data.scripts = []
+
                 if (getTabs().length > 0) {
                     state.componentDataSelectedTable = getTabs()[0].tableIdx
                 }
