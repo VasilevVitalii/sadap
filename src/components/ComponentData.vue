@@ -36,11 +36,13 @@
                         height: 'calc(' + state.pageIndexSplitterHorizontal1 + 'px - 140px)'
                     }"
                 >
-                    <!-- <template v-slot:body="props">
+                    <template v-slot:body="props">
                         <q-tr :props="props">
-                            <q-td v-for="column in getColumns(tab.tableIdx)" :key="column.name" :props="props"> {{ props.row[column.field] }} </q-td>
+                            <q-td v-for="col in props.cols" :key="col.name" :props="props" :class="getCellClass(col.columnIdx, props.row.rowIdx)">
+                                {{ col.value }}
+                            </q-td>
                         </q-tr>
-                    </template> -->
+                    </template>
                 </q-table>
             </q-tab-panel>
         </q-tab-panels>
@@ -137,6 +139,7 @@ export default {
                 stateCommand.data.commands = []
                 stateCommand.data.fullFileName = ''
                 stateScript.data.scripts = []
+                state.columnIdxMouse = undefined
 
                 if (getTabs().length > 0) {
                     state.componentDataSelectedTable = getTabs()[0].tableIdx
@@ -155,6 +158,31 @@ export default {
             electronApi.openUrl('https://github.com/VasilevVitalii/sadap')
         }
 
+        const getCellClass = (columnIdx: number, rowIdx: number): string | undefined => {
+            if (state.columnIdxMouse === columnIdx) {
+                return 'bg-primary text-white'
+            }
+
+            const command = stateCommand.data.commands.find((f) => f.tableIdx === state.componentDataSelectedTable)
+            if (!command) return undefined
+
+            if (command.stopRowIdx) {
+                if (rowIdx && command.startRowIdx && (command.startRowIdx > rowIdx || rowIdx > command.stopRowIdx)) {
+                    return 'bg-secondary'
+                }
+            } else {
+                if (rowIdx && command.startRowIdx && command.startRowIdx > rowIdx) {
+                    return 'bg-secondary'
+                }
+            }
+
+            if (command.converters.some((f) => f.columnIdx === columnIdx && !f.allow)) {
+                return 'bg-secondary'
+            }
+
+            return undefined
+        }
+
         return {
             getTabs,
             getColumns,
@@ -162,6 +190,7 @@ export default {
             doLoadFile,
             doOpenGitHub,
             getLoadedFullFileName,
+            getCellClass,
             state: state,
             statePagination: ref({
                 rowsPerPage: 0

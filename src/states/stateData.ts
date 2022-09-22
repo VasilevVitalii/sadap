@@ -63,7 +63,8 @@ const command = {
                                 label: name,
                                 align: 'left',
                                 field: `col${columnIdx}`,
-                                format: (val) => `${val}`
+                                format: (val) => `${val}`,
+                                columnIdx: columnIdx
                             } as QTableColumn
                         }
                     }),

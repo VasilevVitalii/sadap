@@ -1,5 +1,5 @@
 <template>
-    <div style="display: flex" v-if="getColumn() && getConverter()" @mouseenter="mouse('enter')" @mouseleave="mouse('leave')">
+    <div style="display: flex" v-if="getColumn() && getConverter()" @mouseenter="onMouseMove('enter')" @mouseleave="onMouseMove('leave')">
         <div
             class="text-caption"
             style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; width: 25px; text-align: right; margin: 16px 0px -0px -10px"
@@ -58,6 +58,7 @@
 
 <script lang="ts">
 import stateData, { TColumn, TTable } from '../states/stateData'
+import state from '../states/state'
 import stateCommand, { TCommand, TConverter } from '../states/stateCommand'
 import { Types } from 'mssqlcoop'
 export default {
@@ -98,8 +99,12 @@ export default {
             return false
         }
 
-        const mouse = (action: string) => {
-            console.log(action, props.columnIdx)
+        const onMouseMove = (action: 'enter' | 'leave') => {
+            if (action === 'enter') {
+                state.columnIdxMouse = props.columnIdx
+            } else {
+                state.columnIdxMouse = undefined
+            }
         }
 
         return {
@@ -108,7 +113,7 @@ export default {
             getSupportedTypes,
             getAllowShowLen,
             getAllowShowScalePrecision,
-            mouse
+            onMouseMove
         }
     }
 }
