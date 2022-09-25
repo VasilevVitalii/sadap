@@ -20,11 +20,19 @@ Unzip and run
 ## 2. how it works
 
 1. Open XLSX file
-2. Set first use row and (if nessesary) last row
-3. Customize mapping "column in import file" = "column is mssql temporary table"
-4. Write (if nessesary) additional sql script, which will be run after the temporary table is loaded
-5. Save (if nessesary) mapping columns and script for future use
-6. Generate script
+2. Generate basic mapping "column in import file" = "column is mssql temporary table"
+3. Set first loaded row
+4. **_optional_** Set last loaded row
+5. **_optional_** Customize mapping "column in import file" = "column is mssql temporary table"
+6. **_optional_** Write additional sql script, which will be run after the temporary table is loaded
+7. **_optional_** Save settings for future use. Saving first and last row, mappings and additional sql script
+8. Generate script
+
+If you have a previously saved settings file
+
+1. Open XLSX file
+2. Open saved settings file
+3. Generate script
 
 ![ui1](/public/forReadme/001.png)
 ![ui2](/public/forReadme/002.png)
