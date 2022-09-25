@@ -102,7 +102,7 @@ export default {
                                 { name: 'SQL', extensions: ['sql'] },
                                 { name: 'All files', extensions: ['*'] }
                             ],
-                            ['showHiddenFiles', 'createDirectory']
+                            ['showHiddenFiles', 'createDirectory', 'showOverwriteConfirmation']
                         )
                         if (!fullFileName) return
                     }
@@ -122,9 +122,13 @@ export default {
                     $q.loading.hide()
                 } catch (error) {
                     $q.loading.hide()
-                    $q.dialog({
-                        title: 'Error',
-                        message: `ON GENERATE SCRIPT: ${error}`
+                    const message = `ON GENERATE SCRIPT: ${(error as Error)?.message || 'UNKNOWN ERROR'} `
+                    $q.notify({
+                        type: 'negative',
+                        message: message,
+                        multiLine: true,
+                        timeout: 0,
+                        actions: [{ label: 'close', color: 'white' }]
                     })
                 }
             },
@@ -138,9 +142,13 @@ export default {
                         })
                     })
                     .catch((error) => {
-                        $q.dialog({
-                            title: 'Error',
-                            message: `ON COPY TO CLIPBOARD: ${error}`
+                        const message = `ON COPY TO CLIPBOARD: ${(error as Error)?.message || 'UNKNOWN ERROR'} `
+                        $q.notify({
+                            type: 'negative',
+                            message: message,
+                            multiLine: true,
+                            timeout: 0,
+                            actions: [{ label: 'close', color: 'white' }]
                         })
                     })
             }

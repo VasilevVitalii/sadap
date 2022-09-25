@@ -80,9 +80,13 @@ export default {
                 $q.loading.hide()
             } catch (error) {
                 $q.loading.hide()
-                $q.dialog({
-                    title: 'Error',
-                    message: `ON BUILD MAPPINGS: ${error}`
+                const message = `ON BUILD MAPPINGS: ${(error as Error)?.message || 'UNKNOWN ERROR'} `
+                $q.notify({
+                    type: 'negative',
+                    message: message,
+                    multiLine: true,
+                    timeout: 0,
+                    actions: [{ label: 'close', color: 'white' }]
                 })
             }
         }
@@ -100,7 +104,7 @@ export default {
                     { name: 'JSON', extensions: ['json'] },
                     { name: 'All files', extensions: ['*'] }
                 ],
-                ['showHiddenFiles', 'createDirectory']
+                ['showHiddenFiles', 'createDirectory', 'showOverwriteConfirmation']
             )
             if (!fullFileName) return
 
@@ -118,9 +122,13 @@ export default {
                 $q.loading.hide()
             } catch (error) {
                 $q.loading.hide()
-                $q.dialog({
-                    title: 'Error',
-                    message: `ON SAVE MAPPINGS: ${error}`
+                const message = `ON SAVE MAPPINGS: ${(error as Error)?.message || 'UNKNOWN ERROR'} `
+                $q.notify({
+                    type: 'negative',
+                    message: message,
+                    multiLine: true,
+                    timeout: 0,
+                    actions: [{ label: 'close', color: 'white' }]
                 })
             }
         }
@@ -148,9 +156,13 @@ export default {
                 $q.loading.hide()
             } catch (error) {
                 $q.loading.hide()
-                $q.dialog({
-                    title: 'Error',
-                    message: `ON LOAD MAPPING FILE: ${error}`
+                const message = `ON LOAD MAPPING FILE: ${(error as Error)?.message || 'UNKNOWN ERROR'} `
+                $q.notify({
+                    type: 'negative',
+                    message: message,
+                    multiLine: true,
+                    timeout: 0,
+                    actions: [{ label: 'close', color: 'white' }]
                 })
             }
         }

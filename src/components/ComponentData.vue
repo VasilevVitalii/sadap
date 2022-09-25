@@ -36,6 +36,13 @@
                         height: 'calc(' + state.pageIndexSplitterHorizontal1 + 'px - 140px)'
                     }"
                 >
+                    <template v-slot:header="props">
+                        <q-tr :props="props">
+                            <q-th v-for="col in props.cols" :key="col.name" :props="props" :class="getCellClass(col.columnIdx, -1)">
+                                {{ col.label }}
+                            </q-th>
+                        </q-tr>
+                    </template>
                     <template v-slot:body="props">
                         <q-tr :props="props">
                             <q-td v-for="col in props.cols" :key="col.name" :props="props" :class="getCellClass(col.columnIdx, props.row.rowIdx)">
@@ -90,7 +97,6 @@ export default {
                 ...columns.map((column) => {
                     return {
                         ...column.qColumn,
-                        headerClasses: 'bg-secondary',
                         headerStyle: 'max-width: 150px; text-overflow: ellipsis; overflow: hidden',
                         style: 'max-width: 150px; text-overflow: ellipsis; overflow: hidden',
                         sortable: true
@@ -147,9 +153,13 @@ export default {
                 $q.loading.hide()
             } catch (error) {
                 $q.loading.hide()
-                $q.dialog({
-                    title: 'Error',
-                    message: `ON LOAD DATA FILE: ${error}`
+                const message = `ON LOAD DATA FILE: ${(error as Error)?.message || 'UNKNOWN ERROR'} `
+                $q.notify({
+                    type: 'negative',
+                    message: message,
+                    multiLine: true,
+                    timeout: 0,
+                    actions: [{ label: 'close', color: 'white' }]
                 })
             }
         }
@@ -159,12 +169,14 @@ export default {
         }
 
         const getCellClass = (columnIdx: number, rowIdx: number): string | undefined => {
+            const defaultClass = rowIdx < 0 ? 'bg-secondary' : undefined
+
             if (state.columnIdxMouse === columnIdx) {
                 return 'bg-primary text-white'
             }
 
             const command = stateCommand.data.commands.find((f) => f.tableIdx === state.componentDataSelectedTable)
-            if (!command) return undefined
+            if (!command) return defaultClass
 
             if (command.stopRowIdx) {
                 if (rowIdx && command.startRowIdx && (command.startRowIdx > rowIdx || rowIdx > command.stopRowIdx)) {
@@ -180,7 +192,7 @@ export default {
                 return 'bg-secondary'
             }
 
-            return undefined
+            return defaultClass
         }
 
         return {
