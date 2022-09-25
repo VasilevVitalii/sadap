@@ -25,6 +25,7 @@ function createWindow() {
         width: 1000,
         height: 600,
         useContentSize: true,
+        autoHideMenuBar: true,
         webPreferences: {
             contextIsolation: true,
             // More info: https://v2.quasar.dev/quasar-cli-webpack/developing-electron-apps/electron-preload-script
