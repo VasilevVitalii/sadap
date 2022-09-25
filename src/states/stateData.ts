@@ -45,17 +45,18 @@ const command = {
         data.tables = worksheets
             .filter((f) => f)
             .map((worksheet, worksheetIdx) => {
-                const columns = (worksheet as any)._columns as Column[]
-                const rows = (worksheet as any)._rows as Row[]
+                const rawColumns = ((worksheet as any)._columns || []) as Column[]
+                const rawRows = ((worksheet as any)._rows || []) as Row[]
                 const tableIdx = worksheetIdx + 1
 
-                return {
-                    title: `sheet${tableIdx}`,
-                    tableIdx: tableIdx,
-                    columns: (columns || []).map((column, colIdx) => {
-                        const columnIdx = colIdx + 1
+                const columns = [] as TColumn[]
+                const rows = [] as TRow[]
+
+                rawColumns.forEach((rawColumn) => {
+                    const columnIdx = (rawColumn as any)?._number || -1
+                    if (rawRows.some((f) => (((f as any)?._cells || []) as Cell[]).some((ff) => (ff as any)?._column?._number === columnIdx))) {
                         const name = getNameColumn(columnIdx)
-                        return {
+                        columns.push({
                             columnIdx: columnIdx,
                             name: name,
                             qColumn: {
@@ -66,21 +67,39 @@ const command = {
                                 format: (val) => `${val}`,
                                 columnIdx: columnIdx
                             } as QTableColumn
-                        }
-                    }),
-                    rows: (rows || []).map((row, rowIdx) => {
-                        const cells = (row as any)._cells as Cell[]
-                        return {
-                            rowIdx: rowIdx + 1,
-                            cells: cells.map((cell, colIdx) => {
-                                const columnIdx = colIdx + 1
-                                return {
-                                    columnIdx: columnIdx,
-                                    value: (cell as any)?._value?.model?.value
-                                }
-                            })
+                        })
+                    }
+                })
+
+                rawRows.forEach((rawRow, rowIdx) => {
+                    const reawCells = ((rawRow as any)?._cells || []) as Cell[]
+                    const cells = [] as TCell[]
+                    reawCells.forEach((cell) => {
+                        const columnIdx = (cell as any)?._column?._number
+                        if (columns.some((f) => f.columnIdx === columnIdx)) {
+                            let value = (cell as any)?._value?.model?.value
+                            if (value === undefined) {
+                                value = ''
+                            }
+                            cells.push({ columnIdx, value })
                         }
                     })
+                    const emptyCells = columns
+                        .filter((f) => !cells.some((ff) => ff.columnIdx === f.columnIdx))
+                        .map((m) => {
+                            return {
+                                columnIdx: m.columnIdx,
+                                value: ''
+                            }
+                        }) as TCell[]
+                    rows.push({ rowIdx: rowIdx + 1, cells: [...cells, ...emptyCells] })
+                })
+
+                return {
+                    title: `sheet${tableIdx}`,
+                    tableIdx: tableIdx,
+                    columns: columns,
+                    rows: rows
                 }
             })
         data.fullFileName = fullFileName

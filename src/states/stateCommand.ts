@@ -16,7 +16,7 @@ export type TCommand = {
     startRowIdx: number
     stopRowIdx: number | undefined
     sqlTableName: string | undefined
-    sqlSuffix?: string[] | undefined
+    sqlSuffix?: string | undefined
     converters: TConverter[]
     fileState?: 'loaded' | 'saved'
     fileFullName?: string
@@ -99,7 +99,7 @@ const command = {
                 startRowIdx: command.startRowIdx,
                 stopRowIdx: command.stopRowIdx,
                 sqlTableName: command.sqlTableName,
-                sqlSuffix: command.sqlSuffix,
+                sqlSuffix: (command.sqlSuffix || '').split('\n'),
                 converters: command.converters
             },
             null,
@@ -107,7 +107,7 @@ const command = {
         )
     },
     load(tableIdx: number | undefined, raw: object) {
-        const json = raw as any as TCommand
+        const json = raw as any
 
         if (tableIdx === undefined) return
         let command = data.commands.find((f) => f.tableIdx === tableIdx)
@@ -121,7 +121,7 @@ const command = {
         command.startRowIdx = json.startRowIdx
         command.stopRowIdx = json.stopRowIdx
         command.sqlTableName = json.sqlTableName
-        command.sqlSuffix = json.sqlSuffix
+        command.sqlSuffix = (json.sqlSuffix || []).join('\n')
         command.converters.forEach((converter) => {
             const fnd = json.converters.find((f) => f.columnIdx === converter.columnIdx)
             if (!fnd) {
