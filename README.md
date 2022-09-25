@@ -10,7 +10,7 @@
 # sadap
 
 **Semi-automatic data processing for Microsoft SQL Server.**
-Can load data from external sources (now supported only xlsx) and generate script for process data
+Desktop app for Windows and Linix. Can load data from external sources (now supported only xlsx) and generate script for process data
 
 ## 1. getting started
 
