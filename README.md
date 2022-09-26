@@ -7,7 +7,7 @@
   </a>
 </div>
 
-# sadap
+# ![logo](/public/icons/favicon-128x128.png) sadap
 
 **Semi-automatic data processing for Microsoft SQL Server.**
 Desktop app for Windows and Linix. Can load data from external sources (now supported only xlsx) and generate script for process data
