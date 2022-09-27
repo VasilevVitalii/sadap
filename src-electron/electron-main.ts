@@ -21,6 +21,7 @@ function createWindow() {
      * Initial window options
      */
     mainWindow = new BrowserWindow({
+        show: false,
         icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
         width: 1000,
         height: 600,
@@ -34,6 +35,8 @@ function createWindow() {
             nodeIntegrationInWorker: true // <---  for web workers
         }
     })
+    mainWindow.maximize()
+    mainWindow.show()
 
     mainWindow.loadURL(process.env.APP_URL)
 
