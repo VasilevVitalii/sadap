@@ -34,6 +34,7 @@ export interface ElectronApi {
     fsWriteFile: (fullFileName: string, data: string) => Promise<undefined>
     fsLoadFile: (fullFileName: string) => Promise<string>
     fsPathParse: (fullFileName: string) => path.ParsedPath
+    VV_dateFormat: (date: Date, format: string) => string
 }
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

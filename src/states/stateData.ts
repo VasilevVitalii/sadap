@@ -11,7 +11,8 @@ export type TColumn = {
 
 type TCell = {
     columnIdx: number
-    value: any
+    value: string
+    trueValue: any
 }
 
 export type TRow = {
@@ -77,11 +78,16 @@ const command = {
                     reawCells.forEach((cell) => {
                         const columnIdx = (cell as any)?._column?._number
                         if (columns.some((f) => f.columnIdx === columnIdx)) {
-                            let value = (cell as any)?._value?.model?.value
-                            if (value === undefined) {
-                                value = ''
+                            const trueValue = (cell as any)?._value?.model?.value
+                            let value = ''
+                            if (trueValue !== undefined) {
+                                if (trueValue instanceof Date) {
+                                    value = trueValue.toLocaleString()
+                                } else {
+                                    value = trueValue
+                                }
                             }
-                            cells.push({ columnIdx, value })
+                            cells.push({ columnIdx, value, trueValue })
                         }
                     })
                     const emptyCells = columns

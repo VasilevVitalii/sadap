@@ -4,6 +4,7 @@ import fs from 'fs'
 import exceljs from 'exceljs'
 import { shell } from 'electron'
 import path from 'path'
+import { dateFormat as VV_dateFormat } from 'vv-common'
 
 contextBridge.exposeInMainWorld('electronApi', {
     fsParseXlsx: async (fullFileName: string) => {
@@ -75,5 +76,8 @@ contextBridge.exposeInMainWorld('electronApi', {
     },
     openUrl(url: string) {
         shell.openExternal(url)
+    },
+    VV_dateFormat(date: Date, format: string): string {
+        return VV_dateFormat(date, format)
     }
 })

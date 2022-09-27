@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 import stateData, { TTable } from './stateData'
 import stateCommand from './stateCommand'
 import { Types } from 'mssqlcoop'
+import { electronApi } from 'app/src-electron/electron-api'
 
 export type TScript = {
     tableIdx: number
@@ -134,12 +135,12 @@ const command = {
             row.cells
                 .filter((f) => converters.some((ff) => ff.columnIdx === f.columnIdx))
                 .forEach((cell) => {
-                    const value = String(cell?.value || '')
-
-                    if (value === undefined || value === null || value === '') {
+                    const trueValue = cell?.trueValue
+                    if (trueValue === undefined || trueValue === null || trueValue === '') {
                         selectCell.push('NULL')
                         return
                     }
+
                     const converter = converters.find((f) => f.columnIdx === cell.columnIdx)
                     if (!converter) {
                         errorCell.push(`--not find mapping field for data column ${dc(table, cell.columnIdx)}`)
@@ -150,6 +151,26 @@ const command = {
                         errorCell.push(`--unknown type ${converter?.sqlColumnType || '<UNKNOWN>'}`)
                         return
                     }
+
+                    if (trueValue !== undefined) {
+                        if (trueValue instanceof Date) {
+                            if (type.name === 'date') {
+                                selectCell.push(`'${electronApi.VV_dateFormat(trueValue, 'yyyymmdd')}'`)
+                                return
+                            }
+                            if (type.name === 'datetime') {
+                                selectCell.push(`'${electronApi.VV_dateFormat(trueValue, '126')}'`)
+                                return
+                            }
+                            if (type.name === 'time') {
+                                selectCell.push(`'${electronApi.VV_dateFormat(trueValue, 'hh:mi:ss.msec')}'`)
+                                return
+                            }
+                        }
+                    }
+
+                    const value = String(cell?.trueValue || '')
+
                     if (type.name === 'bigint' || type.name === 'int' || type.name === 'smallint' || type.name === 'tinyint') {
                         const v = Number(value)
                         if (Number.isInteger(v) && !isNaN(Number(v))) {
