@@ -38,14 +38,28 @@
                 >
                     <template v-slot:header="props">
                         <q-tr :props="props">
-                            <q-th v-for="col in props.cols" :key="col.name" :props="props" :class="getCellClass(col.columnIdx, -1)">
+                            <q-th
+                                v-for="col in props.cols"
+                                :key="col.name"
+                                :props="props"
+                                :class="getCellClass(col.columnIdx, -1)"
+                                @mouseenter="onColumnFocus.emit(col.columnIdx)"
+                                @mouseleave="onColumnFocus.emit(undefined)"
+                            >
                                 {{ col.label }}
                             </q-th>
                         </q-tr>
                     </template>
                     <template v-slot:body="props">
                         <q-tr :props="props">
-                            <q-td v-for="col in props.cols" :key="col.name" :props="props" :class="getCellClass(col.columnIdx, props.row.rowIdx)">
+                            <q-td
+                                v-for="col in props.cols"
+                                :key="col.name"
+                                :props="props"
+                                :class="getCellClass(col.columnIdx, props.row.rowIdx)"
+                                @mouseenter="onColumnFocus.emit(col.columnIdx)"
+                                @mouseleave="onColumnFocus.emit(undefined)"
+                            >
                                 {{ col.value }}
                             </q-td>
                         </q-tr>
@@ -66,6 +80,7 @@ import { QTableColumn } from 'quasar'
 import { electronApi } from '../../src-electron/electron-api'
 import { useQuasar } from 'quasar'
 import { ref } from 'vue'
+import bus from '../states/bus'
 export default {
     setup() {
         const $q = useQuasar()
@@ -143,7 +158,7 @@ export default {
                 stateCommand.data.commands = []
                 stateCommand.data.fullFileName = ''
                 stateScript.data.scripts = []
-                state.columnIdxMouse = undefined
+                state.columnIdxFocus = undefined
 
                 if (getTabs().length > 0) {
                     state.componentDataSelectedTable = getTabs()[0].tableIdx
@@ -169,7 +184,7 @@ export default {
         const getCellClass = (columnIdx: number, rowIdx: number): string | undefined => {
             const defaultClass = rowIdx < 0 ? 'bg-secondary' : undefined
 
-            if (state.columnIdxMouse === columnIdx) {
+            if (state.columnIdxFocus === columnIdx) {
                 return 'bg-primary text-white'
             }
 
@@ -201,6 +216,7 @@ export default {
             doOpenGitHub,
             getLoadedFullFileName,
             getCellClass,
+            onColumnFocus: bus.onColumnFocus,
             state: state,
             statePagination: ref({
                 rowsPerPage: 0

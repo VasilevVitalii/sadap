@@ -44,7 +44,7 @@ export default defineComponent({
         const splitterHorizontal = ref(50)
         const splitterHorizontalObject = ref(null)
 
-        bus.windowSize.on(() => {
+        bus.onWindowSize.on(() => {
             splitterHorizontal.value = 50
             OnResizeHorizontal(splitterHorizontal.value)
         })
