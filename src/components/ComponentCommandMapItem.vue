@@ -14,22 +14,7 @@
         </q-input>
 
         <div style="display: flex" v-show="getConverter().allow">
-            <q-input dense borderless stack-label v-model="getConverter().sqlColumnName" label="Sql name" style="width: 200px" />
-            <!-- <q-select
-                dense
-                hide-dropdown-icon
-                borderless
-                use-input
-                input-debounce="0"
-                stack-label
-                v-model="getConverter().sqlColumnType"
-                @filter="doSupportedTypedFilter"
-                :options="supportedTypes"
-                label="Type"
-                style="width: 130px"
-                behavior="menu"
-            /> -->
-
+            <q-input dense borderless stack-label v-model="getConverter().sqlColumnName" label="Sql name" style="width: 190px" />
             <q-select
                 dense
                 hide-dropdown-icon
@@ -41,7 +26,7 @@
                 label="Type"
                 :options="supportedTypes"
                 @filter="doSupportedTypedFilter"
-                style="width: 130px"
+                style="width: 150px"
                 behavior="menu"
             >
                 <template v-slot:no-option>

@@ -1,7 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 import exceljs from 'exceljs'
-import { QVueGlobals } from 'quasar'
 
 export interface ElectronApi {
     fsParseXlsx: (fullFileName: string) => Promise<exceljs.Workbook>
@@ -35,6 +34,7 @@ export interface ElectronApi {
     fsLoadFile: (fullFileName: string) => Promise<string>
     fsPathParse: (fullFileName: string) => path.ParsedPath
     VV_dateFormat: (date: Date, format: string) => string
+    aaaa: string[]
 }
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

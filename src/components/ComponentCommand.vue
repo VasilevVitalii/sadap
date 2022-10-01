@@ -25,6 +25,7 @@
             <q-tab-panels
                 v-model="stateTab"
                 animated
+                style="height: 100%"
                 :style="{
                     height: 'calc(100vh - ' + state.pageIndexSplitterHorizontal1 + 'px - 160px)'
                 }"

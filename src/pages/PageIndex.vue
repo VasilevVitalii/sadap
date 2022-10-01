@@ -17,10 +17,10 @@
 
             <template v-slot:after>
                 <div style="margin: 10px; display: flex">
-                    <div style="width: 610px">
+                    <div style="width: 630px">
                         <ComponentCommand />
                     </div>
-                    <div style="width: calc(100vw - 610px)">
+                    <div style="width: calc(100vw - 630px)">
                         <ComponentScript />
                     </div>
                 </div>
@@ -35,6 +35,7 @@ import state from '../states/state'
 import ComponentData from 'src/components/ComponentData.vue'
 import ComponentCommand from 'src/components/ComponentCommand.vue'
 import ComponentScript from 'src/components/ComponentScript.vue'
+import bus from '../states/bus'
 
 export default defineComponent({
     name: 'PageIndex',
@@ -42,6 +43,11 @@ export default defineComponent({
     setup() {
         const splitterHorizontal = ref(50)
         const splitterHorizontalObject = ref(null)
+
+        bus.windowSize.on(() => {
+            splitterHorizontal.value = 50
+            OnResizeHorizontal(splitterHorizontal.value)
+        })
 
         const OnResizeHorizontal = (value: number) => {
             const height = (splitterHorizontalObject.value as any)?.$el?.clientHeight as number
