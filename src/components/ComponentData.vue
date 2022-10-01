@@ -6,7 +6,7 @@
                 semi-automatic data processing for Microsoft SQL Server
             </div>
             <div class="text-caption" style="text-overflow: ellipsis; overflow: hidden; max-height: 25px; margin: -5px 0px 0px 0px">
-                version 0.0.2 <q-btn dense no-caps flat color="primary" size="sm" label="repository in github" @click="doOpenGitHub(event)" />
+                version 0.0.3 <q-btn dense no-caps flat color="primary" size="sm" label="repository in github" @click="doOpenGitHub(event)" />
             </div>
         </div>
     </div>

@@ -1,5 +1,5 @@
 <template>
-    <div style="display: flex" v-if="getColumn() && getConverter()" @mouseenter="onMouseMove('enter')" @mouseleave="onMouseMove('leave')">
+    <div style="display: flex; max-height: 42px" v-if="getColumn() && getConverter()" @mouseenter="onMouseMove('enter')" @mouseleave="onMouseMove('leave')">
         <div
             class="text-caption"
             style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; width: 25px; text-align: right; margin: 16px 0px -0px -10px"
@@ -15,16 +15,42 @@
 
         <div style="display: flex" v-show="getConverter().allow">
             <q-input dense borderless stack-label v-model="getConverter().sqlColumnName" label="Sql name" style="width: 200px" />
+            <!-- <q-select
+                dense
+                hide-dropdown-icon
+                borderless
+                use-input
+                input-debounce="0"
+                stack-label
+                v-model="getConverter().sqlColumnType"
+                @filter="doSupportedTypedFilter"
+                :options="supportedTypes"
+                label="Type"
+                style="width: 130px"
+                behavior="menu"
+            /> -->
+
             <q-select
                 dense
                 hide-dropdown-icon
                 borderless
-                stack-label
                 v-model="getConverter().sqlColumnType"
-                :options="getSupportedTypes()"
+                use-input
+                stack-label
+                input-debounce="0"
                 label="Type"
+                :options="supportedTypes"
+                @filter="doSupportedTypedFilter"
                 style="width: 130px"
-            />
+                behavior="menu"
+            >
+                <template v-slot:no-option>
+                    <q-item>
+                        <q-item-section class="text-grey"> No results </q-item-section>
+                    </q-item>
+                </template>
+            </q-select>
+
             <q-input
                 dense
                 borderless
@@ -61,6 +87,7 @@ import stateData, { TColumn, TTable } from '../states/stateData'
 import state from '../states/state'
 import stateCommand, { TCommand, TConverter } from '../states/stateCommand'
 import { Types } from 'mssqlcoop'
+import { ref } from 'vue'
 export default {
     props: {
         tableIdx: Number,
@@ -68,6 +95,8 @@ export default {
     },
 
     setup(props) {
+        const supportedTypes = ref(stateCommand.data.supportedTypeName)
+
         const getTable = (): TTable | undefined => {
             return stateData.data.tables.find((f) => f.tableIdx === props.tableIdx)
         }
@@ -80,11 +109,19 @@ export default {
         const getColumn = (): TColumn | undefined => {
             return getTable()?.columns.find((f) => f.columnIdx === props.columnIdx)
         }
+        const doSupportedTypedFilter = (filter: string, update) => {
+            if (filter === '') {
+                update(() => {
+                    supportedTypes.value = stateCommand.data.supportedTypeName
+                })
+                return
+            }
 
-        const getSupportedTypes = (): string[] => {
-            return stateCommand.data.supportedTypeName
+            update(() => {
+                const needle = filter.toLowerCase()
+                supportedTypes.value = stateCommand.data.supportedTypeName.filter((v) => v.toLowerCase().indexOf(needle) > -1)
+            })
         }
-
         const getAllowShowLen = (sqlColumnType: string): boolean => {
             if (sqlColumnType !== 'float') {
                 const t = Types.find((f) => f.name === sqlColumnType)
@@ -92,13 +129,11 @@ export default {
             }
             return false
         }
-
         const getAllowShowScalePrecision = (sqlColumnType: string): boolean => {
             const t = Types.find((f) => f.name === sqlColumnType)
             if (t && t.declare.kind === 'dim2') return true
             return false
         }
-
         const onMouseMove = (action: 'enter' | 'leave') => {
             if (action === 'enter') {
                 state.columnIdxMouse = props.columnIdx
@@ -110,7 +145,8 @@ export default {
         return {
             getConverter,
             getColumn,
-            getSupportedTypes,
+            supportedTypes,
+            doSupportedTypedFilter,
             getAllowShowLen,
             getAllowShowScalePrecision,
             onMouseMove

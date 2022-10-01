@@ -58,8 +58,9 @@ function createWindow() {
         if (!size) return
         const width = size[0]
         const height = size[1]
-        console.log('width: ' + width)
-        console.log('height: ' + height)
+        //TODO resize splitter
+        //console.log('width: ' + width)
+        //console.log('height: ' + height)
     })
 
     enable(mainWindow.webContents)

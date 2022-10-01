@@ -6,6 +6,8 @@
             style="height: calc(100vh - 10px)"
             @update:model-value="OnResizeHorizontal"
             ref="splitterHorizontalObject"
+            separator-style="height: 3px"
+            separator-class="bg-primary"
         >
             <template v-slot:before>
                 <div style="margin: 10px 0px 0px 5px">
