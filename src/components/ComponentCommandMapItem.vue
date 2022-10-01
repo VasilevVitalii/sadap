@@ -2,7 +2,7 @@
     <div style="display: flex; max-height: 42px" v-if="getColumn() && getConverter()" @mouseenter="onMouseMove('enter')" @mouseleave="onMouseMove('leave')">
         <div
             class="text-caption"
-            style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; width: 25px; text-align: right; margin: 16px 0px -0px -10px"
+            style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; width: 25px; text-align: right; margin: 11px 0px -0px -10px"
         >
             {{ getConverter().columnIdx }}
         </div>

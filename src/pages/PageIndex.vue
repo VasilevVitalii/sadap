@@ -11,7 +11,7 @@
         >
             <template v-slot:before>
                 <div style="margin: 10px 0px 0px 5px">
-                    <ComponentData @onChange="OnResizeHorizontal(splitterHorizontal)" />
+                    <ComponentData />
                 </div>
             </template>
 

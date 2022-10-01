@@ -67,8 +67,7 @@ import { electronApi } from '../../src-electron/electron-api'
 import { useQuasar } from 'quasar'
 import { ref } from 'vue'
 export default {
-    emits: ['onChange'],
-    setup(_, { emit }) {
+    setup() {
         const $q = useQuasar()
 
         const getTabs = (): { title: string; tableIdx: number }[] => {
@@ -137,7 +136,6 @@ export default {
                 const fullFileName = Array.isArray(file) && file.length > 0 ? file[0] : undefined
                 if (!fullFileName) return
 
-                emit('onChange')
                 $q.loading.show()
 
                 await stateData.command.load(fullFileName)
