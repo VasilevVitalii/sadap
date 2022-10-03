@@ -17,6 +17,14 @@ const onWindowSize = {
         if (!subscribers.some((f) => f.name === 'onWindowSize' && f.func === subscriber)) {
             subscribers.push({ name: 'onWindowSize', func: subscriber })
         }
+    },
+    emit() {
+        const screen = window?.screen
+        subscribers
+            .filter((f) => f.name === 'onWindowSize')
+            .forEach((s) => {
+                s.func({ width: screen?.width || 0, height: screen?.height || 0 })
+            })
     }
 }
 

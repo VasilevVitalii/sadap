@@ -163,6 +163,7 @@ export default {
                 if (getTabs().length > 0) {
                     state.componentDataSelectedTable = getTabs()[0].tableIdx
                 }
+                bus.onWindowSize.emit()
                 $q.loading.hide()
             } catch (error) {
                 $q.loading.hide()
