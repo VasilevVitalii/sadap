@@ -17,9 +17,6 @@ initialize()
 let mainWindow: BrowserWindow | undefined
 
 function createWindow() {
-    /**
-     * Initial window options
-     */
     mainWindow = new BrowserWindow({
         show: false,
         icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon

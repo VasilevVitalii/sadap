@@ -12,9 +12,9 @@
 
         <div v-if="getCommand()">
             <div style="display: flex; margin: 0px 0px 0px 10px">
-                <q-input dense stack-label v-model="getCommand().startRowIdx" label="First row" style="width: 70px" />
-                <q-input dense stack-label v-model="getCommand().stopRowIdx" label="Last row" style="width: 70px" />
-                <q-input dense stack-label v-model="getCommand().sqlTableName" label="Sql table name" style="width: 300px" />
+                <q-input dense stack-label v-model="(getCommand() || {}).startRowIdx" label="First row" style="width: 70px" />
+                <q-input dense stack-label v-model="(getCommand() || {}).stopRowIdx" label="Last row" style="width: 70px" />
+                <q-input dense stack-label v-model="(getCommand() || {}).sqlTableName" label="Sql table name" style="width: 300px" />
             </div>
 
             <q-tabs v-model="stateTab" dense align="left" active-color="primary" indicator-color="primary" narrow-indicator>
@@ -31,14 +31,14 @@
                 }"
             >
                 <q-tab-panel name="converter">
-                    <div v-for="converter in getCommand().converters" :key="converter.columnIdx">
-                        <ComponentCommandMapItem :tableIdx="getCommand().tableIdx" :columnIdx="converter.columnIdx" />
+                    <div v-for="converter in (getCommand() || {}).converters" :key="converter.columnIdx">
+                        <ComponentCommandMapItem :tableIdx="(getCommand() || {}).tableIdx" :columnIdx="converter.columnIdx" />
                         <q-separator></q-separator>
                     </div>
                 </q-tab-panel>
                 <q-tab-panel name="query">
                     <q-input
-                        :placeholder="'your query after insert data into ' + getCommand().sqlTableName"
+                        :placeholder="'your query after insert data into ' + (getCommand() || {}).sqlTableName"
                         dense
                         style="min-height: 70px"
                         type="textarea"
@@ -46,7 +46,7 @@
                         autogrow
                         stack-label
                         borderless
-                        v-model="getCommand().sqlSuffix"
+                        v-model="(getCommand() || {}).sqlSuffix"
                     />
                 </q-tab-panel>
             </q-tab-panels>

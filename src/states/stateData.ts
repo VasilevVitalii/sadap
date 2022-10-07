@@ -98,13 +98,12 @@ const command = {
                                 value: ''
                             }
                         }) as TCell[]
-                    rows.push({ rowIdx: rowIdx + 1, cells: [...cells, ...emptyCells] })
+                    rows.push({ rowIdx: rowIdx + 1, cells: [...cells, ...emptyCells].sort((item1, item2) => item1.columnIdx - item2.columnIdx) })
                 })
-
                 return {
                     title: `sheet${tableIdx}`,
                     tableIdx: tableIdx,
-                    columns: columns,
+                    columns: columns.sort((item1, item2) => item1.columnIdx - item2.columnIdx),
                     rows: rows
                 }
             })

@@ -10,7 +10,7 @@
             class="text-caption"
             style="text-overflow: ellipsis; overflow: hidden; max-height: 20px; width: 25px; text-align: right; margin: 11px 0px -0px -10px"
         >
-            {{ getConverter().columnIdx }}
+            {{ (getConverter() || {}).columnIdx }}
         </div>
 
         <q-input
@@ -18,23 +18,23 @@
             stack-label
             readonly
             borderless
-            :model-value="getColumn().name"
+            :model-value="(getColumn() || {}).name"
             label="Data name"
             style="width: 110px"
             :input-class="getFocusClass()"
             :label-color="getFocusColor()"
         >
             <template v-slot:prepend>
-                <q-checkbox v-model="getConverter().allow" />
+                <q-checkbox v-model="(getConverter() || {}).allow" />
             </template>
         </q-input>
 
-        <div style="display: flex" v-show="getConverter().allow">
+        <div style="display: flex" v-show="(getConverter() || {}).allow">
             <q-input
                 dense
                 borderless
                 stack-label
-                v-model="getConverter().sqlColumnName"
+                v-model="(getConverter() || {}).sqlColumnName"
                 label="Sql name"
                 style="width: 190px"
                 :input-class="getFocusClass()"
@@ -44,7 +44,7 @@
                 dense
                 hide-dropdown-icon
                 borderless
-                v-model="getConverter().sqlColumnType"
+                v-model="(getConverter() || {}).sqlColumnType"
                 use-input
                 fill-input
                 hide-selected
@@ -71,9 +71,9 @@
                 dense
                 borderless
                 stack-label
-                v-model="getConverter().sqlColumnLen"
+                v-model="(getConverter() || {}).sqlColumnLen"
                 label="Length"
-                v-show="getAllowShowLen(getConverter().sqlColumnType)"
+                v-show="getAllowShowLen((getConverter() || {}).sqlColumnType || '')"
                 style="width: 40px"
                 :input-class="getFocusClass()"
                 :label-color="getFocusColor()"
@@ -82,9 +82,9 @@
                 dense
                 borderless
                 stack-label
-                v-model="getConverter().sqlColumnScale"
+                v-model="(getConverter() || {}).sqlColumnScale"
                 label="Scale"
-                v-show="getAllowShowScalePrecision(getConverter().sqlColumnType)"
+                v-show="getAllowShowScalePrecision((getConverter() || {}).sqlColumnType || '')"
                 style="width: 60px"
                 :input-class="getFocusClass()"
                 :label-color="getFocusColor()"
@@ -93,9 +93,9 @@
                 dense
                 borderless
                 stack-label
-                v-model="getConverter().sqlColumnPrecision"
+                v-model="(getConverter() || {}).sqlColumnPrecision"
                 label="Precision"
-                v-show="getAllowShowScalePrecision(getConverter().sqlColumnType)"
+                v-show="getAllowShowScalePrecision((getConverter() || {}).sqlColumnType || '')"
                 style="width: 60px"
                 :input-class="getFocusClass()"
                 :label-color="getFocusColor()"

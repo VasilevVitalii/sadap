@@ -34,7 +34,7 @@
             <q-tab-panel name="script" style="padding: 16px 10px 0px 10px; overflow: hidden">
                 <textarea
                     v-if="getScript()"
-                    v-model="getScript().script"
+                    v-model="(getScript() || { script: '' }).script"
                     spellcheck="false"
                     readonly
                     style="width: 100%; height: 100%; resize: none; border: none; outline: none; white-space: pre"

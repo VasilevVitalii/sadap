@@ -1,6 +1,6 @@
 {
     "name": "sadap",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "semi-automatic data processing for Microsoft SQL Server",
     "productName": "sadap",
     "author": "Vitalii Vasilev <vasilev.v.vitalii@gmail.com>",
