@@ -113,9 +113,9 @@ const command = {
                 .map((m) => {
                     const type = Types.find((f) => f.name === m.sqlColumnType)
                     const dim = type
-                        ? type.declare.kind === 'dim1'
+                        ? type.declare.kind === 'dim1' && type.name !== 'float'
                             ? `(${(m.sqlColumnLen || '').toString().toUpperCase()})`
-                            : type.declare.kind === 'dim2'
+                            : type.declare.kind === 'dim2' && type.name !== 'float'
                             ? `(${(m.sqlColumnScale || '').toString()},${(m.sqlColumnPrecision || '').toString()})`
                             : ''
                         : ''
